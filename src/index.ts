@@ -64,6 +64,7 @@ export module UnityPackageCreator {
     };
 }
 
+
 export const createUnityPackage = (metaFiles: string[], projectRoot: string, output: string, logger?: (logText: string) => void) => {
     mkdtemp("tempFolder", (err, folder) => {
         if (err) throw err;
