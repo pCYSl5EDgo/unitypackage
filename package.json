@@ -8,7 +8,7 @@
     "test": "exit 0",
     "build": "tsc",
     "semantic-release": "semantic-release",
-    "release": "cd $npm_package_pkg && npx semantic-release"
+    "release": "npx semantic-release"
   },
   "files": [
     "dist/index.js",
