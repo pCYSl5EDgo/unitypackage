@@ -23,14 +23,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
-    - name: Setup Node.js
-      uses: actions/setup-node@v1
-      with:
-        node-version: 12
-
-    - run: npm ci
-
-    - run: npm run semantic-release
+    - run: npm run release
       env:
         NPM_TOKEN: ${{secrets.NPM_TOKEN}}
         GH_TOKEN: ${{secrets.GITHUB_TOKEN}}
