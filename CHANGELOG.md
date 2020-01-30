@@ -1,3 +1,10 @@
+## [1.0.1](https://github.com/pCYSl5EDgo/unitypackage/compare/v1.0.0...v1.0.1) (2020-01-30)
+
+
+### Bug Fixes
+
+* add npm package "git-snapshot" ([312ed3c](https://github.com/pCYSl5EDgo/unitypackage/commit/312ed3c4632e26eea65d90903484aa129dae6217))
+
 # 1.0.0 (2020-01-30)
 
 
