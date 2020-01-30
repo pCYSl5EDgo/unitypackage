@@ -9,7 +9,7 @@ const child_process_1 = require("child_process");
 var UnityPackageCreator;
 (function (UnityPackageCreator) {
     UnityPackageCreator.loadAssetMetaData = (data) => js_yaml_1.safeLoad(data);
-    function DoNothing(err) { if (err)
+    function NoOperation(err) { if (err)
         throw err; }
     ;
     UnityPackageCreator.createUnityPackageFromFolder = (folderContainsMetaFolders, output, callback, logger) => {
@@ -23,7 +23,7 @@ var UnityPackageCreator;
                     throw err;
                 if (logger)
                     logger('write-done : ' + output);
-                fs_1.writeFile(output, data, () => fs_1.rmdir(folderContainsMetaFolders, callback || DoNothing));
+                fs_1.writeFile(output, data, () => fs_1.rmdir(folderContainsMetaFolders, callback || NoOperation));
             });
         });
     };
@@ -44,7 +44,7 @@ var UnityPackageCreator;
                         fs_1.copyFileSync(assetFileAbsolutePath, path_1.join(dir, "asset"));
                     }
                     const assetFileRelativePath = metaFileRelativePathWithExtension.substr(0, metaFileRelativePathWithExtension.length - 5);
-                    fs_1.writeFile(path_1.join(dir, "pathname"), assetFileRelativePath, callback || DoNothing);
+                    fs_1.writeFile(path_1.join(dir, "pathname"), assetFileRelativePath, callback || NoOperation);
                 });
             });
         });

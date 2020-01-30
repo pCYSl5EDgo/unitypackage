@@ -12,7 +12,7 @@ export interface AssetMetaData {
 
 export module UnityPackageCreator {
     export const loadAssetMetaData = (data: string): AssetMetaData => safeLoad(data) as AssetMetaData;
-    function DoNothing(err: NodeJS.ErrnoException | null) { if (err) throw err; };
+    function NoOperation(err: NodeJS.ErrnoException | null) { if (err) throw err; };
     export const createUnityPackageFromFolder = (folderContainsMetaFolders: string, output: string, callback?: NoParamCallback, logger?: (logText: string) => void) => {
         const archtemp = join(tmpdir(), "archtemp.tar");
         execSync('tar -cf ' + archtemp + ' -C "' + folderContainsMetaFolders + '" ./');
@@ -22,7 +22,7 @@ export module UnityPackageCreator {
                 if (err) throw err;
                 if (logger)
                     logger('write-done : ' + output);
-                writeFile(output, data, () => rmdir(folderContainsMetaFolders, callback || DoNothing));
+                writeFile(output, data, () => rmdir(folderContainsMetaFolders, callback || NoOperation));
             });
         });
     };
@@ -45,7 +45,7 @@ export module UnityPackageCreator {
                     }
 
                     const assetFileRelativePath = metaFileRelativePathWithExtension.substr(0, metaFileRelativePathWithExtension.length - 5);
-                    writeFile(join(dir, "pathname"), assetFileRelativePath, callback || DoNothing);
+                    writeFile(join(dir, "pathname"), assetFileRelativePath, callback || NoOperation);
                 });
             });
         });
