@@ -1,0 +1,68 @@
+{
+  "name": "unitypackage",
+  "version": "1.0.1",
+  "description": "create unitypackage utility",
+  "main": "dist/index.js",
+  "pkg": "unitypackage",
+  "scripts": {
+    "test": "exit 0",
+    "build": "tsc",
+    "semantic-release": "semantic-release",
+    "release": "cd $npm_package_pkg && npx semantic-release"
+  },
+  "release": {
+    "branches": [
+      "master",
+      {
+        "name": "preview",
+        "prerelease": true
+      }
+    ],
+    "plugins": [
+      "@semantic-release/commit-analyzer",
+      "@semantic-release/release-notes-generator",
+      "@semantic-release/changelog",
+      "@semantic-release/git",
+      [
+        "@semantic-release/npm",
+        {
+          "npmPublish": false,
+          "tarballDir": "."
+        }
+      ],
+      [
+        "@semantic-release/exec",
+        {
+          "prepareCmd": "tar -xzvf *.tgz",
+          "publishCmd": "git snapshot -p package -b upm -r ${options.repositoryUrl} -t ${nextRelease.version} -m \"${nextRelease.notes}\""
+        }
+      ]
+    ]
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/pCYSl5EDgo/unitypackage.git"
+  },
+  "author": "pCYSl5EDgo",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/pCYSl5EDgo/unitypackage/issues"
+  },
+  "homepage": "https://github.com/pCYSl5EDgo/unitypackage#readme",
+  "devDependencies": {
+    "@semantic-release/changelog": "^5.0.0",
+    "@semantic-release/commit-analyzer": "^8.0.0",
+    "@semantic-release/exec": "^5.0.0",
+    "@semantic-release/git": "^9.0.0",
+    "@semantic-release/npm": "^7.0.0",
+    "@semantic-release/release-notes-generator": "^9.0.0",
+    "@types/js-yaml": "^3.12.1",
+    "@types/node": "^13.5.1",
+    "git-snapshot": "^2.2.0",
+    "semantic-release": "^17.0.1",
+    "typescript": "^3.7.4"
+  },
+  "dependencies": {
+    "js-yaml": "^3.13.1"
+  }
+}
