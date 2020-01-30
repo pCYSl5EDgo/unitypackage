@@ -6,13 +6,13 @@ const path_1 = require("path");
 const os_1 = require("os");
 const zlib_1 = require("zlib");
 const child_process_1 = require("child_process");
-var UnityPackageCreator;
-(function (UnityPackageCreator) {
-    UnityPackageCreator.loadAssetMetaData = (data) => js_yaml_1.safeLoad(data);
+var UnityPackageMaker;
+(function (UnityPackageMaker) {
+    UnityPackageMaker.loadAssetMetaData = (data) => js_yaml_1.safeLoad(data);
     function NoOperation(err) { if (err)
         throw err; }
     ;
-    UnityPackageCreator.createUnityPackageFromFolder = (folderContainsMetaFolders, output, callback, logger) => {
+    UnityPackageMaker.createUnityPackageFromFolder = (folderContainsMetaFolders, output, callback, logger) => {
         const archtemp = path_1.join(os_1.tmpdir(), "archtemp.tar");
         child_process_1.execSync('tar -cf ' + archtemp + ' -C "' + folderContainsMetaFolders + '" ./');
         fs_1.readFile(archtemp, (err, data) => {
@@ -27,12 +27,12 @@ var UnityPackageCreator;
             });
         });
     };
-    UnityPackageCreator.createMetaFolderUnderFolder = (folderContainsMetaFolders, metaFileRelativePathWithExtension, projectRoot, callback, logger) => {
+    UnityPackageMaker.createMetaFolderUnderFolder = (folderContainsMetaFolders, metaFileRelativePathWithExtension, projectRoot, callback, logger) => {
         const metaFileAbsolutePath = path_1.join(projectRoot, metaFileRelativePathWithExtension);
         fs_1.readFile(metaFileAbsolutePath, { encoding: "utf-8" }, async (err, data) => {
             if (err)
                 throw err;
-            const metaDatum = UnityPackageCreator.loadAssetMetaData(data);
+            const metaDatum = UnityPackageMaker.loadAssetMetaData(data);
             const guid = metaDatum.guid;
             const dir = path_1.join(folderContainsMetaFolders, guid);
             if (logger)
@@ -49,26 +49,26 @@ var UnityPackageCreator;
             });
         });
     };
-    UnityPackageCreator.createUnityPackageFromMetaFilePathsWithTempFolder = (metaFiles, projectRoot, output, folderContainsMetaFolders, logger) => {
+    UnityPackageMaker.createUnityPackageFromMetaFilePathsWithTempFolder = (metaFiles, projectRoot, output, folderContainsMetaFolders, logger) => {
         const processHasDone = new Array(metaFiles.length);
         processHasDone.fill(false);
         metaFiles.forEach((metaFilePath, index, _) => {
             const callback = () => {
                 processHasDone[index] = true;
                 if (processHasDone.indexOf(false) === -1)
-                    UnityPackageCreator.createUnityPackageFromFolder(folderContainsMetaFolders, output);
+                    UnityPackageMaker.createUnityPackageFromFolder(folderContainsMetaFolders, output);
             };
-            UnityPackageCreator.createMetaFolderUnderFolder(metaFilePath, projectRoot, folderContainsMetaFolders, callback, logger);
+            UnityPackageMaker.createMetaFolderUnderFolder(metaFilePath, projectRoot, folderContainsMetaFolders, callback, logger);
         });
     };
-})(UnityPackageCreator = exports.UnityPackageCreator || (exports.UnityPackageCreator = {}));
+})(UnityPackageMaker = exports.UnityPackageMaker || (exports.UnityPackageMaker = {}));
 exports.createUnityPackage = (metaFiles, projectRoot, output, logger) => {
     fs_1.mkdtemp("tempFolder", (err, folder) => {
         if (err)
             throw err;
         const folderContainsMetaFolders = path_1.join(folder, 'archtemp');
         fs_1.mkdir(folderContainsMetaFolders, () => {
-            UnityPackageCreator.createUnityPackageFromMetaFilePathsWithTempFolder(metaFiles, projectRoot, output, folderContainsMetaFolders, logger);
+            UnityPackageMaker.createUnityPackageFromMetaFilePathsWithTempFolder(metaFiles, projectRoot, output, folderContainsMetaFolders, logger);
         });
     });
 };

@@ -4,7 +4,7 @@ export interface AssetMetaData {
     guid: string;
     folderAsset: 'yes' | 'no' | undefined;
 }
-export declare module UnityPackageCreator {
+export declare module UnityPackageMaker {
     const loadAssetMetaData: (data: string) => AssetMetaData;
     const createUnityPackageFromFolder: (folderContainsMetaFolders: string, output: string, callback?: NoParamCallback | undefined, logger?: ((logText: string) => void) | undefined) => void;
     const createMetaFolderUnderFolder: (folderContainsMetaFolders: string, metaFileRelativePathWithExtension: string, projectRoot: string, callback?: NoParamCallback | undefined, logger?: ((logText: string) => void) | undefined) => void;

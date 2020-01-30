@@ -10,7 +10,7 @@ export interface AssetMetaData {
     folderAsset: 'yes' | 'no' | undefined
 }
 
-export module UnityPackageCreator {
+export module UnityPackageMaker {
     export const loadAssetMetaData = (data: string): AssetMetaData => safeLoad(data) as AssetMetaData;
     function NoOperation(err: NodeJS.ErrnoException | null) { if (err) throw err; };
     export const createUnityPackageFromFolder = (folderContainsMetaFolders: string, output: string, callback?: NoParamCallback, logger?: (logText: string) => void) => {
@@ -70,7 +70,7 @@ export const createUnityPackage = (metaFiles: string[], projectRoot: string, out
         if (err) throw err;
         const folderContainsMetaFolders = join(folder, 'archtemp');
         mkdir(folderContainsMetaFolders, () => {
-            UnityPackageCreator.createUnityPackageFromMetaFilePathsWithTempFolder(metaFiles, projectRoot, output, folderContainsMetaFolders, logger);
+            UnityPackageMaker.createUnityPackageFromMetaFilePathsWithTempFolder(metaFiles, projectRoot, output, folderContainsMetaFolders, logger);
         });
     });
 };
