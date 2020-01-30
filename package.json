@@ -58,6 +58,7 @@
     "@semantic-release/release-notes-generator": "^9.0.0",
     "@types/js-yaml": "^3.12.1",
     "@types/node": "^13.5.1",
+    "git-snapshot": "^2.2.0",
     "semantic-release": "^17.0.1",
     "typescript": "^3.7.4"
   },
