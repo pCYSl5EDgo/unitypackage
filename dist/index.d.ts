@@ -4,10 +4,10 @@ export interface AssetMetaData {
     guid: string;
     folderAsset: 'yes' | 'no' | undefined;
 }
-export declare module UnityPackageMaker {
+export declare module InternalImplementation {
     const loadAssetMetaData: (data: string) => AssetMetaData;
-    const createUnityPackageFromFolder: (folderContainsMetaFolders: string, output: string, callback?: NoParamCallback | undefined, logger?: ((logText: string) => void) | undefined) => void;
-    const createMetaFolderUnderFolder: (folderContainsMetaFolders: string, metaFileRelativePathWithExtension: string, projectRoot: string, callback?: NoParamCallback | undefined, logger?: ((logText: string) => void) | undefined) => void;
-    const createUnityPackageFromMetaFilePathsWithTempFolder: (metaFiles: string[], projectRoot: string, output: string, folderContainsMetaFolders: string, logger?: ((logText: string) => void) | undefined) => void;
+    function createUnityPackageFromFolder(folderContainsMetaFolders: string, output: string, callback?: NoParamCallback, logger?: (logText: string) => void, removeDirs?: string[]): void;
+    function createMetaFolderUnderFolder(metaFileRelativePathWithExtension: string, projectRoot: string, folderContainsMetaFolders: string, callback?: NoParamCallback, logger?: (logText: string) => void): void;
+    function createUnityPackageFromMetaFilePathsWithTempFolder(metaFiles: string[], projectRoot: string, output: string, folderContainsMetaFolders: string, logger?: (logText: string) => void, removeDirs?: string[]): void;
 }
-export declare const createUnityPackage: (metaFiles: string[], projectRoot: string, output: string, logger?: ((logText: string) => void) | undefined) => void;
+export default function createUnityPackage(metaFiles: string[], projectRoot: string, output: string, logger?: (logText: string) => void): void;
