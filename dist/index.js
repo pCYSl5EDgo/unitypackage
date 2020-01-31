@@ -5,7 +5,6 @@ const fs_1 = require("fs");
 const path_1 = require("path");
 const os_1 = require("os");
 const child_process_1 = require("child_process");
-const is_windows = process.platform === 'win32';
 var InternalImplementation;
 (function (InternalImplementation) {
     InternalImplementation.loadAssetMetaData = (data) => js_yaml_1.safeLoad(data);
@@ -43,12 +42,15 @@ var InternalImplementation;
                 }
                 throw err;
             }
-            if (!is_windows) {
-                child_process_1.exec('gzip -f "' + archtemp + '"', totalEnd);
-            }
-            else {
-                child_process_1.exec('"C:\\Program Files\\7-Zip\\7z.exe" a -tgzip "' + archtemp + '.gz" "' + archtemp + '"', totalEnd);
-            }
+            const sevenZipPath = '"C:\\Program Files\\7-Zip\\7z.exe"';
+            fs_1.exists(sevenZipPath, (doesExist) => {
+                if (doesExist) {
+                    child_process_1.exec(sevenZipPath + ' a -tgzip "' + archtemp + '.gz" "' + archtemp + '"', totalEnd);
+                }
+                else {
+                    child_process_1.exec('gzip -f "' + archtemp + '"', totalEnd);
+                }
+            });
         });
     }
     InternalImplementation.createUnityPackageFromFolder = createUnityPackageFromFolder;

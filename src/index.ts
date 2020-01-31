@@ -1,5 +1,5 @@
 import { safeLoad } from 'js-yaml';
-import { readFile, writeFile, copyFile, copyFileSync, mkdir, NoParamCallback, mkdtemp, rename, rmdirSync, mkdirSync, RmDirAsyncOptions } from 'fs';
+import { readFile, writeFile, copyFile, copyFileSync, mkdir, NoParamCallback, mkdtemp, rename, rmdirSync, mkdirSync, RmDirAsyncOptions, exists } from 'fs';
 import { join } from 'path';
 import { tmpdir } from 'os';
 import { exec } from 'child_process';
@@ -8,8 +8,6 @@ export interface AssetMetaData {
     guid: string;
     folderAsset: 'yes' | 'no' | undefined
 }
-
-const is_windows = process.platform === 'win32'
 
 export module InternalImplementation {
     export const loadAssetMetaData = (data: string): AssetMetaData => safeLoad(data) as AssetMetaData;
@@ -50,12 +48,15 @@ export module InternalImplementation {
                 }
                 throw err;
             }
-            if (!is_windows) {
-                exec('gzip -f "' + archtemp + '"', totalEnd);
-            }
-            else {
-                exec('"C:\\Program Files\\7-Zip\\7z.exe" a -tgzip "' + archtemp + '.gz" "' + archtemp + '"', totalEnd);
-            }
+            const sevenZipPath = '"C:\\Program Files\\7-Zip\\7z.exe"';
+            exists(sevenZipPath, (doesExist) => {
+                if (doesExist) {
+                    exec(sevenZipPath + ' a -tgzip "' + archtemp + '.gz" "' + archtemp + '"', totalEnd);
+                }
+                else {
+                    exec('gzip -f "' + archtemp + '"', totalEnd);
+                }
+            });
         });
     };
 
