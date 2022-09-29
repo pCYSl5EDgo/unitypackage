@@ -1,8 +1,11 @@
-import { safeLoad } from 'js-yaml';
-import { readFile, writeFile, copyFile, copyFileSync, mkdir, NoParamCallback, mkdtemp, rename, rmdirSync, mkdirSync, RmDirAsyncOptions, exists } from 'fs';
-import { join } from 'path';
-import { tmpdir } from 'os';
 import { exec } from 'child_process';
+import { RmDirOptions, existsSync } from 'fs';
+import { copyFile, mkdir, mkdtemp, readFile, rmdir, writeFile, stat } from 'fs/promises';
+import { load } from 'js-yaml';
+import { tmpdir } from 'os';
+import { join } from 'path';
+
+export type NoParamAsyncCallback = (err: NodeJS.ErrnoException | null) => Promise<void>;
 
 export interface AssetMetaData {
     guid: string;
@@ -10,35 +13,40 @@ export interface AssetMetaData {
 }
 
 export module InternalImplementation {
-    export const loadAssetMetaData = (data: string): AssetMetaData => safeLoad(data) as AssetMetaData;
-    function NoOperation(err: NodeJS.ErrnoException | null) { if (err) throw err; };
-    const recursiveDelete: RmDirAsyncOptions = { recursive: true };
-    export function createUnityPackageFromFolder(
+    export const loadAssetMetaData = (data: string): AssetMetaData => load(data) as AssetMetaData;
+    async function NoOperation(err: NodeJS.ErrnoException | null): Promise<void> { if (err) { throw err; } };
+    const recursiveDelete: RmDirOptions = { recursive: true };
+    export async function createUnityPackageFromFolder(
         folderContainsMetaFolders: string,
         output: string,
-        callback?: NoParamCallback,
+        callback?: NoParamAsyncCallback,
         logger?: (logText: string) => void,
         removeDirs?: string[],
-    ): void {
+    ): Promise<void> {
         const tmpDirectory = join(tmpdir(), "tmp");
         const archtemp = join(tmpDirectory, "archtemp.tar");
-        rmdirSync(tmpDirectory, recursiveDelete);
-        mkdirSync(tmpDirectory);
-        function totalEnd(): void {
+        await rmdir(tmpDirectory, recursiveDelete);
+        await mkdir(tmpDirectory);
+        async function totalEnd(): Promise<void> {
             const archtemp_gzip = archtemp + '.gz';
-            copyFile(archtemp_gzip, output, (err) => {
-                if (err) {
-                    throw err;
+            await copyFile(archtemp_gzip, output);
+            if (removeDirs) {
+                for (const removeDir of removeDirs) {
+                    await rmdir(removeDir, recursiveDelete);
                 }
-                if (removeDirs) {
-                    for (const removeDir of removeDirs) {
-                        rmdirSync(removeDir, recursiveDelete);
-                    }
+            }
+
+            try {
+                await rmdir(tmpDirectory, recursiveDelete);
+            } catch (error) {
+                if (callback) {
+                    callback(error as (NodeJS.ErrnoException | null));
                 }
-                rmdirSync(tmpDirectory, recursiveDelete);
-                if (callback)
-                    callback(null);
-            });
+                return;
+            }
+            if (callback) {
+                callback(null);
+            }
         };
         exec('tar -cf "' + archtemp + '" -C "' + folderContainsMetaFolders + '" .', (err, stdout, stderr) => {
             if (err) {
@@ -46,81 +54,93 @@ export module InternalImplementation {
                     logger('stdout : ' + stdout);
                     logger('stderr : ' + stderr);
                 }
+
                 throw err;
             }
+
             const sevenZipPath = '"C:\\Program Files\\7-Zip\\7z.exe"';
-            exists(sevenZipPath, (doesExist) => {
-                if (doesExist) {
-                    exec(sevenZipPath + ' a -tgzip "' + archtemp + '.gz" "' + archtemp + '"', totalEnd);
-                }
-                else {
-                    exec('gzip -f "' + archtemp + '"', totalEnd);
-                }
-            });
+            if (existsSync(sevenZipPath)) {
+                exec(sevenZipPath + ' a -tgzip "' + archtemp + '.gz" "' + archtemp + '"', totalEnd);
+            }
+            else {
+                exec('gzip -f "' + archtemp + '"', totalEnd);
+            }
         });
     };
 
-    export function createMetaFolderUnderFolder(
+    export async function createMetaFolderUnderFolder(
         metaFileRelativePathWithExtension: string,
         projectRoot: string,
         folderContainsMetaFolders: string,
-        callback?: NoParamCallback,
+        callback?: NoParamAsyncCallback,
         logger?: (logText: string) => void,
-    ): void {
+    ): Promise<void> {
         const metaFileAbsolutePath = join(projectRoot, metaFileRelativePathWithExtension);
-        readFile(metaFileAbsolutePath, { encoding: "utf-8" }, async (err, data) => {
-            if (err) throw err;
-            const metaDatum = loadAssetMetaData(data);
-            const guid = metaDatum.guid;
-            const dir = join(folderContainsMetaFolders, guid);
+        const data = await readFile(metaFileAbsolutePath, { encoding: "utf-8" });
+        const metaDatum = loadAssetMetaData(data);
+        const guid = metaDatum.guid;
+        const dir = join(folderContainsMetaFolders, guid);
+        if (logger) {
+            logger('create-directory : ' + dir);
+        }
 
-            if (logger)
-                logger('create-directory : ' + dir);
-            mkdir(dir, () => {
-                copyFile(metaFileAbsolutePath, join(dir, "asset.meta"), () => {
-                    if (metaDatum.folderAsset !== "yes") {
-                        const assetFileAbsolutePath = metaFileAbsolutePath.substr(0, metaFileAbsolutePath.length - 5);
-                        copyFileSync(assetFileAbsolutePath, join(dir, "asset"));
-                    }
+        await mkdir(dir);
+        await copyFile(metaFileAbsolutePath, join(dir, "asset.meta"));
+        if (metaDatum.folderAsset !== "yes") {
+            const assetFileAbsolutePath = metaFileAbsolutePath.slice(0, metaFileAbsolutePath.length - 5);
+            const stats = await stat(assetFileAbsolutePath);
+            if (stats.isFile()) {
+                await copyFile(assetFileAbsolutePath, join(dir, "asset"));
+            }
+        }
 
-                    const assetFileRelativePath = metaFileRelativePathWithExtension.substr(0, metaFileRelativePathWithExtension.length - 5);
-                    writeFile(join(dir, "pathname"), assetFileRelativePath, callback || NoOperation);
-                });
-            });
-        });
+        const assetFileRelativePath = metaFileRelativePathWithExtension.slice(0, metaFileRelativePathWithExtension.length - 5);
+        try {
+            await writeFile(join(dir, "pathname"), assetFileRelativePath);
+        }
+        catch (error) {
+            if (callback) {
+                callback(error as (NodeJS.ErrnoException | null));
+            }
+            return;
+        }
+        if (callback) {
+            callback(null);
+        }
     };
-    export function createUnityPackageFromMetaFilePathsWithTempFolder(
+
+    export async function createUnityPackageFromMetaFilePathsWithTempFolder(
         metaFiles: string[],
         projectRoot: string,
         output: string,
         folderContainsMetaFolders: string,
         logger?: (logText: string) => void,
         removeDirs?: string[],
-    ): void {
+    ): Promise<void> {
         const processHasDone = new Array(metaFiles.length);
         processHasDone.fill(false);
-        metaFiles.forEach((metaFilePath, index, _) => {
-            const callback = () => {
-                processHasDone[index] = true;
-                if (processHasDone.indexOf(false) === -1)
-                    createUnityPackageFromFolder(folderContainsMetaFolders, output, NoOperation, logger, removeDirs);
+        for (let index = 0; index < metaFiles.length; index++) {
+            const currentIndex = index;
+            const metaFilePath = metaFiles[currentIndex];
+            const callback = async (err: NodeJS.ErrnoException | null): Promise<void> => {
+                if (err) {
+                    throw err;
+                }
+
+                processHasDone[currentIndex] = true;
+                if (processHasDone.indexOf(false) === -1) {
+                    await createUnityPackageFromFolder(folderContainsMetaFolders, output, NoOperation, logger, removeDirs);
+                }
             };
-            createMetaFolderUnderFolder(metaFilePath, projectRoot, folderContainsMetaFolders, callback, logger);
-        });
+
+            await createMetaFolderUnderFolder(metaFilePath, projectRoot, folderContainsMetaFolders, callback, logger);
+        }
     };
 }
 
-export default function createUnityPackage(metaFiles: string[], projectRoot: string, output: string, logger?: (logText: string) => void): void {
-    mkdtemp("tempFolder", (err, folder) => {
-        if (err) {
-            if (logger)
-                logger('failedName : ' + folder || '`empty`');
-            throw err;
-        }
-        const folderContainsMetaFolders = join(folder, 'archtemp');
-        mkdir(folderContainsMetaFolders, () => {
-            const create = InternalImplementation.createUnityPackageFromMetaFilePathsWithTempFolder;
-            create(metaFiles, projectRoot, output, folderContainsMetaFolders, logger, [folder]);
-        });
-    });
+export default async function createUnityPackage(metaFiles: string[], projectRoot: string, output: string, logger?: (logText: string) => void): Promise<void> {
+    const folder = await mkdtemp("tempFolder");
+    const folderContainsMetaFolders = join(folder, 'archtemp');
+    await mkdir(folderContainsMetaFolders);
+    await InternalImplementation.createUnityPackageFromMetaFilePathsWithTempFolder(metaFiles, projectRoot, output, folderContainsMetaFolders, logger, [folder]);
 };
