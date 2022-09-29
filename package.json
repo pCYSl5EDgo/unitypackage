@@ -1,6 +1,6 @@
 {
   "name": "unitypackage",
-  "version": "0.0.1",
+  "version": "1.0.4",
   "description": "create unitypackage utility",
   "main": "dist/index.js",
   "pkg": "unitypackage",
