@@ -6,9 +6,7 @@
   "pkg": "unitypackage",
   "scripts": {
     "test": "exit 0",
-    "build": "tsc",
-    "semantic-release": "semantic-release",
-    "release": "npx semantic-release"
+    "build": "tsc"
   },
   "files": [
     "dist/index.js",
@@ -27,15 +25,8 @@
   },
   "homepage": "https://github.com/pCYSl5EDgo/unitypackage#readme",
   "devDependencies": {
-    "@semantic-release/changelog": "^6.0.0",
-    "@semantic-release/commit-analyzer": "^9.0.0",
-    "@semantic-release/exec": "^6.0.0",
-    "@semantic-release/git": "^10.0.0",
-    "@semantic-release/npm": "^9.0.0",
-    "@semantic-release/release-notes-generator": "^10.0.0",
     "@types/js-yaml": "^4.0.0",
     "@types/node": "^16.0.0",
-    "semantic-release": "^19.0.0",
     "typescript": "^4.8"
   },
   "dependencies": {
