@@ -1,6 +1,6 @@
 import { exec } from 'node:child_process';
-import { RmDirOptions, existsSync } from 'node:fs';
-import { copyFile, mkdir, mkdtemp, readFile, rmdir, writeFile, stat } from 'node:fs/promises';
+import { existsSync, RmOptions } from 'node:fs';
+import { copyFile, mkdir, mkdtemp, readFile, rm, writeFile, stat } from 'node:fs/promises';
 import { load } from 'js-yaml';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -15,7 +15,7 @@ export interface AssetMetaData {
 export module InternalImplementation {
     export const loadAssetMetaData = (data: string): AssetMetaData => load(data) as AssetMetaData;
     async function NoOperation(err: NodeJS.ErrnoException | null): Promise<void> { if (err) { throw err; } };
-    const recursiveDelete: RmDirOptions = { recursive: true };
+    const recursiveDelete: RmOptions = { recursive: true, force: true };
     export async function createUnityPackageFromFolder(
         folderContainsMetaFolders: string,
         output: string,
@@ -25,19 +25,19 @@ export module InternalImplementation {
     ): Promise<void> {
         const tmpDirectory = join(tmpdir(), "tmp");
         const archtemp = join(tmpDirectory, "archtemp.tar");
-        await rmdir(tmpDirectory, recursiveDelete);
+        await rm(tmpDirectory, recursiveDelete);
         await mkdir(tmpDirectory);
         async function totalEnd(): Promise<void> {
             const archtemp_gzip = archtemp + '.gz';
             await copyFile(archtemp_gzip, output);
             if (removeDirs) {
                 for (const removeDir of removeDirs) {
-                    await rmdir(removeDir, recursiveDelete);
+                    await rm(removeDir, recursiveDelete);
                 }
             }
 
             try {
-                await rmdir(tmpDirectory, recursiveDelete);
+                await rm(tmpDirectory, recursiveDelete);
             } catch (error) {
                 if (callback) {
                     callback(error as (NodeJS.ErrnoException | null));
