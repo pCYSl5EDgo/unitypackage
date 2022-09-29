@@ -1,4 +1,4 @@
-import createUnityPackage from './index';
+import createUnityPackage from './index.js';
 const files = [
     'Assets/Voiceer.meta',
     'Assets/Voiceer/VoiceResources.meta',

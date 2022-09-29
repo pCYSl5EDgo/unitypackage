@@ -1,9 +1,9 @@
-import { exec } from 'child_process';
-import { RmDirOptions, existsSync } from 'fs';
-import { copyFile, mkdir, mkdtemp, readFile, rmdir, writeFile, stat } from 'fs/promises';
+import { exec } from 'node:child_process';
+import { RmDirOptions, existsSync } from 'node:fs';
+import { copyFile, mkdir, mkdtemp, readFile, rmdir, writeFile, stat } from 'node:fs/promises';
 import { load } from 'js-yaml';
-import { tmpdir } from 'os';
-import { join } from 'path';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 
 export type NoParamAsyncCallback = (err: NodeJS.ErrnoException | null) => Promise<void>;
 

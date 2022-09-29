@@ -1,4 +1,4 @@
-/// <reference types="node" />
+/// <reference types="node" resolution-mode="require"/>
 export declare type NoParamAsyncCallback = (err: NodeJS.ErrnoException | null) => Promise<void>;
 export interface AssetMetaData {
     guid: string;

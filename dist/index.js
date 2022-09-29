@@ -1,9 +1,9 @@
-import { exec } from 'child_process';
-import { existsSync } from 'fs';
-import { copyFile, mkdir, mkdtemp, readFile, rmdir, writeFile, stat } from 'fs/promises';
+import { exec } from 'node:child_process';
+import { existsSync } from 'node:fs';
+import { copyFile, mkdir, mkdtemp, readFile, rmdir, writeFile, stat } from 'node:fs/promises';
 import { load } from 'js-yaml';
-import { tmpdir } from 'os';
-import { join } from 'path';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 export var InternalImplementation;
 (function (InternalImplementation) {
     InternalImplementation.loadAssetMetaData = (data) => load(data);
@@ -112,7 +112,7 @@ export var InternalImplementation;
     }
     InternalImplementation.createUnityPackageFromMetaFilePathsWithTempFolder = createUnityPackageFromMetaFilePathsWithTempFolder;
     ;
-})(InternalImplementation || (InternalImplementation = {}));
+})(InternalImplementation = InternalImplementation || (InternalImplementation = {}));
 export default async function createUnityPackage(metaFiles, projectRoot, output, logger) {
     const folder = await mkdtemp("tempFolder");
     const folderContainsMetaFolders = join(folder, 'archtemp');
