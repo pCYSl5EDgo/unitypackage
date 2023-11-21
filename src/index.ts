@@ -1,7 +1,7 @@
 import { exec } from 'node:child_process';
 import { existsSync, RmOptions } from 'node:fs';
 import { copyFile, mkdir, mkdtemp, readFile, rm, writeFile, stat } from 'node:fs/promises';
-import { load } from 'js-yaml';
+import { parse } from 'yaml';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
@@ -13,7 +13,7 @@ export interface AssetMetaData {
 }
 
 export module InternalImplementation {
-    export const loadAssetMetaData = (data: string): AssetMetaData => load(data) as AssetMetaData;
+    export const loadAssetMetaData = (data: string): AssetMetaData => parse(data) as AssetMetaData;
     async function NoOperation(err: NodeJS.ErrnoException | null): Promise<void> { if (err) { throw err; } };
     const recursiveDelete: RmOptions = { recursive: true, force: true };
     export async function createUnityPackageFromFolder(

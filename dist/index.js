@@ -1,12 +1,12 @@
 import { exec } from 'node:child_process';
 import { existsSync } from 'node:fs';
 import { copyFile, mkdir, mkdtemp, readFile, rm, writeFile, stat } from 'node:fs/promises';
-import { load } from 'js-yaml';
+import { parse } from 'yaml';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 export var InternalImplementation;
 (function (InternalImplementation) {
-    InternalImplementation.loadAssetMetaData = (data) => load(data);
+    InternalImplementation.loadAssetMetaData = (data) => parse(data);
     async function NoOperation(err) { if (err) {
         throw err;
     } }
