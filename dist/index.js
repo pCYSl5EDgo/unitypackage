@@ -112,7 +112,7 @@ export var InternalImplementation;
     }
     InternalImplementation.createUnityPackageFromMetaFilePathsWithTempFolder = createUnityPackageFromMetaFilePathsWithTempFolder;
     ;
-})(InternalImplementation = InternalImplementation || (InternalImplementation = {}));
+})(InternalImplementation || (InternalImplementation = {}));
 export default async function createUnityPackage(metaFiles, projectRoot, output, logger) {
     const folder = await mkdtemp("tempFolder");
     const folderContainsMetaFolders = join(folder, 'archtemp');
